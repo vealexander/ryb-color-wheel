@@ -34,8 +34,6 @@ This overwrites the PNG/ICO files in `public/`. If it prints different filenames
 
 Push to `main` — `.github/workflows/deploy.yml` builds and publishes to GitHub Pages automatically. The one-time setup step (already done for this repo, if you followed the handoff instructions) is enabling **Settings → Pages → Source → GitHub Actions**.
 
-Live at: https://vealexander.github.io/ryb-color-wheel/
-
 **If you ever rename this repo**, update `base` in `vite.config.js` to match — it must always equal `/<repo-name>/`, or every asset will 404 on deploy.
 
 ## Install on a device
