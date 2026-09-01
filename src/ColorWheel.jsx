@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 
 const RYB_STOPS = [
   { angle: 0, name: "Red", hex: "#E1362D" },
@@ -34,7 +40,8 @@ const SCHEMES = {
   splitComplementary: {
     label: "Split-Complementary",
     offsets: [0, 150, 210],
-    blurb: "A hue plus the two neighbors of its opposite — contrast, less tension.",
+    blurb:
+      "A hue plus the two neighbors of its opposite — contrast, less tension.",
   },
   square: {
     label: "Square",
@@ -76,7 +83,7 @@ function rgbToHex(rgb) {
       .map((v) =>
         Math.round(Math.max(0, Math.min(255, v)))
           .toString(16)
-          .padStart(2, "0")
+          .padStart(2, "0"),
       )
       .join("")
       .toUpperCase()
@@ -243,7 +250,10 @@ export default function ColorWheel() {
       copyTimeoutRef.current = window.setTimeout(() => setCopiedId(null), 1200);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(hex).then(done).catch(() => fallbackCopy(hex, done));
+      navigator.clipboard
+        .writeText(hex)
+        .then(done)
+        .catch(() => fallbackCopy(hex, done));
     } else {
       fallbackCopy(hex, done);
     }
@@ -267,124 +277,479 @@ export default function ColorWheel() {
   return (
     <div className="cw-root">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+        /* Material 3 + Apple Liquid Glass Design System */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap');
 
-        .cw-root, .cw-root *{ box-sizing:border-box; }
-        .cw-root{
-          --ink:#0c0b09;
-          --panel:#151310;
-          --cream:#E8DFC8;
-          --muted:#8f8672;
-          --amber:#C98A3E;
-          --amber-soft: rgba(201,138,62,0.35);
-          --hairline:#2a2620;
-          position:relative;
-          background:var(--ink);
-          color:var(--cream);
-          font-family:'IBM Plex Mono', ui-monospace, monospace;
-          padding:28px 18px 32px;
-          max-width:440px;
-          margin:0 auto;
-          border-radius:4px;
-          overflow:hidden;
-          -webkit-font-smoothing:antialiased;
+        /* ========== GLOBAL & RESET ========== */
+        .cw-root, .cw-root * { box-sizing: border-box; }
+        
+        /* ========== MATERIAL 3 & GLASS DESIGN TOKENS ========== */
+        .cw-root {
+          /* Dark Theme Surface Colors (Material 3) */
+          --surface-darkest: #0f0e0b;
+          --surface-dark: #1a1815;
+          --surface-base: #232019;
+          --surface-light: #2d2a26;
+          --surface-lighter: #3a3632;
+          
+          /* Material 3 Color System - Primary (Vibrant Teal/Cyan for dark mode sophistication) */
+          --primary: #4dd0e1;
+          --on-primary: #001f23;
+          --primary-container: #005961;
+          --on-primary-container: #b2f7ff;
+          
+          /* Secondary (Muted Purple-Gray) */
+          --secondary: #9a8fb8;
+          --on-secondary: #2b2845;
+          --secondary-container: #423c5f;
+          --on-secondary-container: #ffc4e1;
+          
+          /* Tertiary (Warm Peach accent) */
+          --tertiary: #f4aa6a;
+          --on-tertiary: #4d2500;
+          --tertiary-container: #6d3f1d;
+          --on-tertiary-container: #ffe0c1;
+          
+          /* Semantic Colors */
+          --error: #f2b8b5;
+          --on-error: #601410;
+          --warning: #f4aa6a;
+          --success: #81c784;
+          
+          /* Surface Overlays & Text */
+          --on-surface: #ece1d7;
+          --on-surface-variant: #9b918a;
+          
+          /* Glass Effect Tokens */
+          --glass-blur-intense: 30px;
+          --glass-blur-medium: 20px;
+          --glass-blur-subtle: 10px;
+          --glass-opacity-max: 0.85;
+          --glass-opacity-medium: 0.75;
+          --glass-opacity-subtle: 0.65;
+          
+          /* Elevation Shadows (Material 3) */
+          --shadow-0: none;
+          --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+          --shadow-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+          --shadow-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+          --shadow-4: 0 15px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05);
+          --shadow-5: 0 20px 40px rgba(0, 0, 0, 0.2);
+          
+          /* State Layers (Material 3 interaction feedback) */
+          --state-layer-hover: rgba(77, 208, 225, 0.08);
+          --state-layer-focus: rgba(77, 208, 225, 0.12);
+          --state-layer-pressed: rgba(77, 208, 225, 0.12);
+          --state-layer-disabled: rgba(236, 225, 215, 0.12);
+          
+          /* Root Container */
+          position: relative;
+          background: var(--surface-darkest);
+          color: var(--on-surface);
+          font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          padding: 24px 20px 28px;
+          max-width: 480px;
+          margin: 0 auto;
+          border-radius: 28px;
+          overflow: hidden;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
         }
-        .cw-grain{
-          position:absolute; inset:0;
-          background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-          opacity:0.05;
-          mix-blend-mode:overlay;
-          pointer-events:none;
+
+        /* ========== SURFACES & GLASS EFFECTS ========== */
+        .cw-grain {
+          position: absolute;
+          inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+          opacity: 0.02;
+          mix-blend-mode: overlay;
+          pointer-events: none;
         }
-        .cw-content{ position:relative; z-index:1; }
-        .cw-eyebrow{
-          font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase;
-          color:var(--amber); margin:0 0 8px;
+
+        .cw-content {
+          position: relative;
+          z-index: 1;
         }
-        .cw-title{
-          font-family:'Fraunces', serif; font-weight:600;
-          font-size:28px; line-height:1.1; margin:0 0 8px; color:var(--cream);
+
+        /* ========== TYPOGRAPHY SCALE (Material 3) ========== */
+        .cw-eyebrow {
+          font-family: 'Poppins', sans-serif;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--primary);
+          margin: 0 0 8px;
+          line-height: 1.5;
         }
-        .cw-subtitle{
-          font-size:12px; line-height:1.55; color:var(--muted); margin:0 0 22px; max-width:38ch;
+
+        .cw-title {
+          font-family: 'Poppins', sans-serif;
+          font-size: 32px;
+          font-weight: 600;
+          line-height: 1.2;
+          letter-spacing: -0.5px;
+          margin: 0 0 8px;
+          color: var(--on-surface);
         }
-        .cw-schemes{
-          display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:14px;
+
+        .cw-subtitle {
+          font-family: 'Roboto', sans-serif;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 1.57;
+          color: var(--on-surface-variant);
+          margin: 0 0 20px;
+          max-width: 42ch;
         }
-        .cw-scheme-btn{
-          font-family:inherit; font-size:11px; letter-spacing:0.02em;
-          padding:9px 10px; border-radius:3px;
-          background:transparent; border:1px solid var(--hairline); color:var(--muted);
-          cursor:pointer; text-align:left; transition:border-color .15s, color .15s, background .15s;
+
+        /* ========== SCHEME BUTTONS (Material 3 filled tonal buttons) ========== */
+        .cw-schemes {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+          margin-bottom: 12px;
         }
-        .cw-scheme-btn:hover{ border-color:var(--amber-soft); color:var(--cream); }
-        .cw-scheme-btn:focus-visible{ outline:2px solid var(--amber); outline-offset:1px; }
-        .cw-scheme-btn.active{
-          background:var(--amber); border-color:var(--amber); color:var(--ink); font-weight:600;
+
+        .cw-scheme-btn {
+          font-family: inherit;
+          font-size: 12px;
+          font-weight: 500;
+          letter-spacing: 0.01em;
+          padding: 10px 16px;
+          border-radius: 10px;
+          background: var(--surface-light);
+          border: none;
+          color: var(--on-surface-variant);
+          cursor: pointer;
+          text-align: left;
+          transition: all 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+          backdrop-filter: blur(var(--glass-blur-subtle));
+          position: relative;
+          overflow: hidden;
         }
-        .cw-blurb{
-          font-size:11.5px; color:var(--muted); min-height:32px; margin:0 0 6px; line-height:1.5;
+
+        .cw-scheme-btn::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: var(--state-layer-hover);
+          opacity: 0;
+          transition: opacity 150ms;
         }
-        .cw-readout{
-          display:flex; justify-content:space-between; align-items:baseline;
-          font-size:11px; color:var(--amber); border-top:1px solid var(--hairline);
-          border-bottom:1px solid var(--hairline); padding:7px 2px; margin-bottom:22px;
-          letter-spacing:0.03em;
+
+        .cw-scheme-btn:hover::before {
+          opacity: 1;
         }
-        .cw-readout b{ color:var(--cream); font-weight:600; }
-        .cw-wheel-wrap{
-          position:relative; width:min(78vw,300px); aspect-ratio:1/1; margin:0 auto 20px;
-          touch-action:none; -webkit-user-select:none; user-select:none; cursor:grab;
+
+        .cw-scheme-btn:hover {
+          color: var(--on-surface);
+          border-color: transparent;
         }
-        .cw-wheel-wrap:active{ cursor:grabbing; }
-        .cw-wheel-wrap:focus-visible{ outline:2px solid var(--amber); outline-offset:6px; border-radius:50%; }
-        .cw-tick{
-          position:absolute; transform:translate(-50%,-50%);
-          font-size:8px; color:var(--muted); letter-spacing:0.02em;
-          pointer-events:none; white-space:nowrap;
+
+        .cw-scheme-btn:focus-visible {
+          outline: 2px solid var(--primary);
+          outline-offset: 2px;
         }
-        .cw-marker-dot{
-          border-radius:50%; border:2px solid var(--ink);
-          box-shadow:0 0 0 1.5px rgba(232,223,200,0.85), 0 1px 4px rgba(0,0,0,0.5);
+
+        .cw-scheme-btn.active {
+          background: var(--primary);
+          color: var(--on-primary);
+          font-weight: 600;
+          box-shadow: var(--shadow-1);
         }
-        .cw-slider-row{
-          display:flex; align-items:center; gap:10px; margin-bottom:26px;
+
+        .cw-scheme-btn.active::before {
+          display: none;
         }
-        .cw-slider-row label{ font-size:10.5px; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase; flex-shrink:0; }
-        .cw-slider-row input[type=range]{
-          flex:1; appearance:none; -webkit-appearance:none; height:2px; background:var(--hairline); border-radius:2px; outline:none;
+
+        /* ========== BLURB & METADATA ========== */
+        .cw-blurb {
+          font-size: 13px;
+          font-weight: 400;
+          color: var(--on-surface-variant);
+          min-height: 32px;
+          margin: 0 0 12px;
+          line-height: 1.5;
         }
-        .cw-slider-row input[type=range]::-webkit-slider-thumb{
-          -webkit-appearance:none; appearance:none; width:14px; height:14px; border-radius:50%;
-          background:var(--amber); cursor:pointer; border:2px solid var(--ink);
+
+        .cw-readout {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--on-surface-variant);
+          background: rgba(77, 208, 225, 0.08);
+          border-radius: 12px;
+          padding: 12px 14px;
+          margin-bottom: 20px;
+          letter-spacing: 0.03em;
+          backdrop-filter: blur(var(--glass-blur-subtle));
+          border: 1px solid rgba(77, 208, 225, 0.1);
         }
-        .cw-slider-row input[type=range]::-moz-range-thumb{
-          width:14px; height:14px; border-radius:50%; background:var(--amber); cursor:pointer; border:2px solid var(--ink);
+
+        .cw-readout b {
+          color: var(--primary);
+          font-weight: 600;
         }
-        .cw-slider-row input[type=range]:focus-visible{ outline:2px solid var(--amber); outline-offset:3px; }
-        .cw-slider-val{ font-size:11px; color:var(--cream); width:34px; text-align:right; flex-shrink:0; }
-        .cw-swatches{
-          display:grid; grid-template-columns:repeat(2,1fr); gap:9px;
+
+        /* ========== COLOR WHEEL (NO VISUAL CHANGES) ========== */
+        .cw-wheel-wrap {
+          position: relative;
+          width: min(78vw, 300px);
+          aspect-ratio: 1 / 1;
+          margin: 0 auto 24px;
+          touch-action: none;
+          -webkit-user-select: none;
+          user-select: none;
+          cursor: grab;
+          border-radius: 50%;
         }
-        .cw-swatch{
-          position:relative; display:flex; align-items:center; gap:9px;
-          background:var(--panel); border:1px solid var(--hairline); border-radius:3px;
-          padding:8px; font-family:inherit; color:var(--cream); cursor:pointer; text-align:left;
-          transition:border-color .15s;
+
+        .cw-wheel-wrap:active {
+          cursor: grabbing;
         }
-        .cw-swatch:hover{ border-color:var(--amber-soft); }
-        .cw-swatch:focus-visible{ outline:2px solid var(--amber); outline-offset:1px; }
-        .cw-chip{ width:32px; height:32px; border-radius:3px; flex-shrink:0; border:1px solid rgba(255,255,255,0.15); }
-        .cw-swatch-text{ min-width:0; }
-        .cw-hex{ font-size:11.5px; font-weight:600; display:block; }
-        .cw-hue-name{ font-size:10px; color:var(--muted); display:block; margin-top:1px; }
-        .cw-copied{
-          position:absolute; top:5px; right:6px; font-size:8.5px; letter-spacing:0.05em;
-          color:var(--amber); text-transform:uppercase;
+
+        .cw-wheel-wrap:focus-visible {
+          outline: 3px solid var(--primary);
+          outline-offset: 6px;
+          border-radius: 50%;
         }
-        .cw-sr-only{
-          position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
-          clip:rect(0,0,0,0); white-space:nowrap; border:0;
+
+        .cw-tick {
+          position: absolute;
+          transform: translate(-50%, -50%);
+          font-size: 9px;
+          font-weight: 500;
+          color: var(--on-surface-variant);
+          letter-spacing: 0.02em;
+          pointer-events: none;
+          white-space: nowrap;
+        }
+
+        .cw-marker-dot {
+          border-radius: 50%;
+          border: 2.5px solid var(--surface-darkest);
+          box-shadow: 0 0 0 1.5px rgba(77, 208, 225, 0.8), var(--shadow-2);
+          transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .cw-marker-dot:active {
+          transform: scale(1.15);
+        }
+
+        /* ========== SLIDER CONTROLS ========== */
+        .cw-slider-row {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 24px;
+          background: rgba(77, 208, 225, 0.04);
+          padding: 12px 14px;
+          border-radius: 12px;
+          backdrop-filter: blur(var(--glass-blur-subtle));
+          border: 1px solid rgba(77, 208, 225, 0.08);
+        }
+
+        .cw-slider-row label {
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--on-surface-variant);
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          flex-shrink: 0;
+        }
+
+        .cw-slider-row input[type="range"] {
+          flex: 1;
+          appearance: none;
+          -webkit-appearance: none;
+          height: 4px;
+          background: linear-gradient(to right, var(--surface-light), var(--primary));
+          border-radius: 2px;
+          outline: none;
+          cursor: pointer;
+        }
+
+        .cw-slider-row input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: var(--primary);
+          cursor: pointer;
+          border: 2px solid var(--surface-darkest);
+          box-shadow: var(--shadow-2);
+          transition: all 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .cw-slider-row input[type="range"]::-webkit-slider-thumb:hover {
+          box-shadow: var(--shadow-3);
+          transform: scale(1.2);
+        }
+
+        .cw-slider-row input[type="range"]::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: var(--primary);
+          cursor: pointer;
+          border: 2px solid var(--surface-darkest);
+          box-shadow: var(--shadow-2);
+          transition: all 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .cw-slider-row input[type="range"]::-moz-range-thumb:hover {
+          box-shadow: var(--shadow-3);
+          transform: scale(1.2);
+        }
+
+        .cw-slider-row input[type="range"]:focus-visible {
+          outline: 2px solid var(--primary);
+          outline-offset: 3px;
+        }
+
+        .cw-slider-val {
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--primary);
+          width: 40px;
+          text-align: right;
+          flex-shrink: 0;
+        }
+
+        /* ========== COLOR SWATCHES (Material 3 glass cards) ========== */
+        .cw-swatches {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+
+        .cw-swatch {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: rgba(45, 42, 38, 0.6);
+          backdrop-filter: blur(var(--glass-blur-medium));
+          border: 1px solid rgba(77, 208, 225, 0.15);
+          border-radius: 14px;
+          padding: 12px;
+          font-family: inherit;
+          color: var(--on-surface);
+          cursor: pointer;
+          text-align: left;
+          transition: all 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+          overflow: hidden;
+        }
+
+        .cw-swatch::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: var(--state-layer-hover);
+          opacity: 0;
+          transition: opacity 200ms;
+        }
+
+        .cw-swatch:hover {
+          border-color: rgba(77, 208, 225, 0.35);
+          background: rgba(45, 42, 38, 0.8);
+          box-shadow: var(--shadow-2);
+          transform: translateY(-2px);
+        }
+
+        .cw-swatch:hover::before {
+          opacity: 1;
+        }
+
+        .cw-swatch:focus-visible {
+          outline: 2px solid var(--primary);
+          outline-offset: 1px;
+        }
+
+        .cw-swatch:active {
+          transform: translateY(0);
+          box-shadow: var(--shadow-1);
+        }
+
+        .cw-chip {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          flex-shrink: 0;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), var(--shadow-1);
+        }
+
+        .cw-swatch-text {
+          min-width: 0;
+          flex: 1;
+          position: relative;
+          z-index: 2;
+        }
+
+        .cw-hex {
+          font-size: 12px;
+          font-weight: 600;
+          display: block;
+          letter-spacing: 0.02em;
+          font-family: 'Roboto Mono', monospace;
+        }
+
+        .cw-hue-name {
+          font-size: 11px;
+          color: var(--on-surface-variant);
+          display: block;
+          margin-top: 2px;
+          font-weight: 400;
+        }
+
+        .cw-copied {
+          position: absolute;
+          top: 8px;
+          right: 10px;
+          font-size: 9px;
+          letter-spacing: 0.05em;
+          color: var(--primary);
+          text-transform: uppercase;
+          font-weight: 600;
+          animation: fadeInOut 1200ms ease-in-out;
+          pointer-events: none;
+          z-index: 3;
+        }
+
+        @keyframes fadeInOut {
+          0% { opacity: 0; transform: translateY(-4px); }
+          10% { opacity: 1; transform: translateY(0); }
+          90% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-4px); }
+        }
+
+        /* ========== ACCESSIBILITY ========== */
+        .cw-sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
+        /* ========== REDUCED MOTION ========== */
+        @media (prefers-reduced-motion: reduce) {
+          .cw-scheme-btn,
+          .cw-swatch,
+          .cw-marker-dot,
+          .cw-slider-row input[type="range"]::-webkit-slider-thumb,
+          .cw-slider-row input[type="range"]::-moz-range-thumb {
+            transition: none;
+          }
         }
       `}</style>
 
@@ -394,7 +759,8 @@ export default function ColorWheel() {
         <p className="cw-eyebrow">Traditional Pigment Wheel</p>
         <h2 className="cw-title">RYB Color Wheel</h2>
         <p className="cw-subtitle">
-          The red-yellow-blue wheel artists have used since Itten. Pick a harmony, then drag the wheel — or use the slider — to rotate it.
+          The red-yellow-blue wheel artists have used since Itten. Pick a
+          harmony, then drag the wheel — or use the slider — to rotate it.
         </p>
 
         <div className="cw-schemes">
@@ -440,7 +806,8 @@ export default function ColorWheel() {
               inset: "11%",
               borderRadius: "50%",
               background: conicGradient,
-              boxShadow: "0 0 0 1px rgba(232,223,200,0.12), 0 10px 30px rgba(0,0,0,0.5)",
+              boxShadow:
+                "0 0 0 1px rgba(232,223,200,0.12), 0 10px 30px rgba(0,0,0,0.5)",
             }}
           />
           <div
@@ -448,7 +815,8 @@ export default function ColorWheel() {
               position: "absolute",
               inset: "11%",
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)",
+              background:
+                "radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)",
               pointerEvents: "none",
             }}
           />
@@ -471,14 +839,22 @@ export default function ColorWheel() {
               position: "absolute",
               inset: 0,
               transform: `rotate(${baseAngle}deg)`,
-              transition: isDragging ? "none" : "transform 300ms cubic-bezier(.2,.8,.2,1)",
+              transition: isDragging
+                ? "none"
+                : "transform 300ms cubic-bezier(.2,.8,.2,1)",
               transformOrigin: "50% 50%",
               pointerEvents: "none",
             }}
           >
             <svg
               viewBox="0 0 100 100"
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                overflow: "visible",
+              }}
             >
               {schemeKey === "monochromatic" ? (
                 <line
@@ -517,7 +893,10 @@ export default function ColorWheel() {
                     transform: "translate(-50%,-50%)",
                   }}
                 >
-                  <div className="cw-marker-dot" style={{ width: size, height: size, background: m.color }} />
+                  <div
+                    className="cw-marker-dot"
+                    style={{ width: size, height: size, background: m.color }}
+                  />
                 </div>
               );
             })}
@@ -526,7 +905,11 @@ export default function ColorWheel() {
           {RYB_STOPS.map((s) => {
             const p = point(s.angle, TICK_R);
             return (
-              <span key={s.angle} className="cw-tick" style={{ left: `${p.x}%`, top: `${p.y}%` }}>
+              <span
+                key={s.angle}
+                className="cw-tick"
+                style={{ left: `${p.x}%`, top: `${p.y}%` }}
+              >
                 {tickAbbr(s.name)}
               </span>
             );
@@ -543,7 +926,9 @@ export default function ColorWheel() {
             value={Math.round(baseAngle)}
             onChange={(e) => setBaseAngle(Number(e.target.value))}
           />
-          <span className="cw-slider-val">{String(Math.round(baseAngle)).padStart(3, "0")}°</span>
+          <span className="cw-slider-val">
+            {String(Math.round(baseAngle)).padStart(3, "0")}°
+          </span>
         </div>
 
         <div className="cw-swatches">
